@@ -8,6 +8,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
@@ -18,11 +20,18 @@ public class HelloApplication extends Application implements EventHandler<Action
     public void start(Stage stage) throws IOException {
         //set stage
         stage.setResizable(true);
+
         //setting pain
         GridPane pane = new GridPane();
         pane.setHgap(8); // Set horizontal gap
         pane.setVgap(32); // Set vertical gap
         pane.setPadding(new Insets(4, 48, 48, 48));
+
+        Pane pane2 = new Pane();
+
+        pane2.setPadding(new Insets(4, 48, 48, 48));
+
+
         //text set
         Text t = new Text (10, 20, "choose scheduler");
         pane.add(t,0,1);
@@ -48,34 +57,43 @@ public class HelloApplication extends Application implements EventHandler<Action
         pane.add(RR_button,0,3);
         //Table setting
         TableView <Process> table= new TableView<Process>();
+        table.setPrefHeight(300);
+        //table.setLayoutX(60);
+
         TableColumn processName = new TableColumn("Process Name");
         TableColumn burstTime = new TableColumn("Burst Time");
         TableColumn arrivalTime = new TableColumn("Arrival Time");
         TableColumn priority = new TableColumn("PRIORITY");
         //Radio buttons event handling
         FCFS_button.setOnAction((e)->{
+            table.setLayoutX(90);
             table.getColumns().addAll(processName, burstTime, arrivalTime);
-            pane.add(table,0,5);
+            pane2.getChildren().add(table);
         });
         SJS_button.setOnAction((e)->{
+            table.setLayoutX(90);
             table.getColumns().addAll(processName, burstTime, arrivalTime);
-            pane.add(table,0,5);
+            pane2.getChildren().add(table);
         });
         SRTF_button.setOnAction((e)->{
+            table.setLayoutX(90);
             table.getColumns().addAll(processName, burstTime, arrivalTime);
-            pane.add(table,0,5);
+            pane2.getChildren().add(table);
         });
         PP_button.setOnAction((e)->{
+            table.setLayoutX(60);
             table.getColumns().addAll(processName, burstTime, arrivalTime,priority);
-            pane.add(table,0,5);
+            pane2.getChildren().add(table);
         });
         PNP_button.setOnAction((e)->{
+            table.setLayoutX(60);
             table.getColumns().addAll(processName, burstTime, arrivalTime,priority);
-            pane.add(table,0,5);
+            pane2.getChildren().add(table);
         });
         RR_button.setOnAction((e)->{
+            table.setLayoutX(90);
             table.getColumns().addAll(processName, burstTime, arrivalTime);
-            pane.add(table,0,5);
+            pane2.getChildren().add(table);
         });
 
 
@@ -100,8 +118,7 @@ public class HelloApplication extends Application implements EventHandler<Action
 //        });
 //        pane.add(ok,2,2);
 
-
-        Scene scene = new Scene(pane);
+        Scene scene = new Scene(new VBox(pane,pane2) ,450,550);
         stage.setTitle("Hello!");
         stage.setScene(scene);
         stage.show();
