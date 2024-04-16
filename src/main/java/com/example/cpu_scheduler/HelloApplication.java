@@ -81,7 +81,6 @@ public class HelloApplication extends Application implements EventHandler<Action
         //Table setting
         TableView <Process> table= new TableView<Process>();
         table.setPrefHeight(300);
-        //table.setLayoutX(60);
 
         TableColumn processName = new TableColumn("Process Name");
         TableColumn burstTime = new TableColumn("Burst Time");
