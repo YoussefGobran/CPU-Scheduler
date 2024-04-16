@@ -6,7 +6,6 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -58,7 +57,6 @@ public class HelloApplication extends Application implements EventHandler<Action
         //Table setting
         TableView <Process> table= new TableView<Process>();
         table.setPrefHeight(300);
-        //table.setLayoutX(60);
 
         TableColumn processName = new TableColumn("Process Name");
         TableColumn burstTime = new TableColumn("Burst Time");
