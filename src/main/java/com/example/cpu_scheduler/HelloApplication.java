@@ -1,11 +1,14 @@
 package com.example.cpu_scheduler;
 
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -13,27 +16,79 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class HelloApplication extends Application implements EventHandler<ActionEvent> {
+    private List<Process> processList = new ArrayList<>();
+    public void printProcessList() {
+        System.out.println("Current List of Processes:");
+        for (Process process : processList) {
+            System.out.println(process.getArrival_time()+" "+process.getBurst_time()+" "+ process.getPriority());
+            System.out.println();
+        }
+    }
     @Override
     public void start(Stage stage) throws IOException {
+        //flags
+        final boolean[] priorityFlag = {false};
         //set stage
-        stage.setResizable(true);
-
-        //setting pain
-        GridPane pane = new GridPane();
+        stage.setResizable(false);
+        stage.setTitle("CPU SCHEDULER - ENG ASU");
+        //setting pane
+        GridPane pane = new GridPane(); //radio buttons holder
         pane.setHgap(8); // Set horizontal gap
         pane.setVgap(32); // Set vertical gap
         pane.setPadding(new Insets(4, 48, 48, 48));
 
-        Pane pane2 = new Pane();
+        Pane pane2 = new Pane(); // tabel holder
+        pane2.setPadding(new Insets(4, 48, 10, 48));
 
-        pane2.setPadding(new Insets(4, 48, 48, 48));
+        GridPane grid = new GridPane(); //text fields and add button holder
+        grid.setPadding(new Insets(10, 10, 10, 10));
+        grid.setVgap(5);
+        grid.setHgap(5);
 
+        Pane pane3 = new Pane(); // schedular button holder
+        pane3.setPadding(new Insets(4, 48, 10, 48));
 
         //text set
         Text t = new Text (10, 20, "choose scheduler");
         pane.add(t,0,1);
+
+        //Text Fields
+        //Creating a GridPane container
+
+
+        final TextField pName = new TextField();
+        pName.setPromptText("process Name");
+        pName.setPrefColumnCount(15);
+        GridPane.setConstraints(pName, 5, 5);
+
+        final TextField pArrivalTime = new TextField();
+        pArrivalTime.setPromptText("Arrival Time");
+        pArrivalTime.setPrefColumnCount(15);
+        GridPane.setConstraints(pArrivalTime, 9, 5);
+
+        final TextField pBurstTime = new TextField();
+        pBurstTime.setPromptText("Burst Time");
+        pBurstTime.setPrefColumnCount(15);
+        GridPane.setConstraints(pBurstTime, 7, 5);
+
+        final TextField pPriority = new TextField();
+        pPriority.setPromptText("Priority");
+        pPriority.setPrefColumnCount(15);
+        GridPane.setConstraints(pPriority, 10, 5);
+
+        // Add process button
+        Button addButton = new Button("Add Process");
+        GridPane.setConstraints(addButton, 5, 7);
+
+        Button scheduleButton = new Button("Schedule Processes");
+        scheduleButton.setLayoutX(168);
+        //GridPane.setConstraints(scheduleButton, 9, 8);
+
         //Radio buttons setting
         ToggleGroup group = new ToggleGroup();
         RadioButton FCFS_button = new RadioButton("FCFS");
@@ -49,79 +104,176 @@ public class HelloApplication extends Application implements EventHandler<Action
         PP_button.setToggleGroup(group);
         pane.add(PP_button,2,2);
         RadioButton PNP_button = new RadioButton("PRIORITY-NONPREEMEPTIVE");
-        PP_button.setToggleGroup(group);
+        PNP_button.setToggleGroup(group);
         pane.add(PNP_button,2,3);
         RadioButton RR_button = new RadioButton("ROUND_ROBIN");
         RR_button.setToggleGroup(group);
         pane.add(RR_button,0,3);
+
         //Table setting
         TableView <Process> table= new TableView<Process>();
         table.setPrefHeight(300);
+        //set table column
+        TableColumn<Process, String> processName = new TableColumn<>("processName");
+        processName.setCellValueFactory(new PropertyValueFactory<>("process_name"));
 
-        TableColumn processName = new TableColumn("Process Name");
-        TableColumn burstTime = new TableColumn("Burst Time");
-        TableColumn arrivalTime = new TableColumn("Arrival Time");
-        TableColumn priority = new TableColumn("PRIORITY");
+        TableColumn<Process, Integer> burstTime = new TableColumn<>("Burst Time");
+        burstTime.setCellValueFactory(new PropertyValueFactory<>("burst_time"));
+
+        TableColumn<Process, Integer> arrivalTime = new TableColumn<>("Arrival Time");
+        arrivalTime.setCellValueFactory(new PropertyValueFactory<>("arrival_time"));
+
+        TableColumn<Process, Integer> priority = new TableColumn<>("PRIORITY");
+        priority.setCellValueFactory(new PropertyValueFactory<>("priority"));
+
+        //////////////////////////////////////////////////////////////////Tabel/////////////////////////////////////////////////////
+// Set column alignment and resizing
+        processName.setSortable(false); // Example: Disable sorting for Process Name column
+        burstTime.setSortable(false);    // Enable sorting for Burst Time column
+        arrivalTime.setSortable(false);  // Enable sorting for Arrival Time column
+        priority.setSortable(false);      // Enable sorting for Priority column
+
+// Set column resizing
+        processName.setResizable(false); // Example: Disable resizing for Process Name column
+        burstTime.setResizable(false);    // Enable resizing for Burst Time column
+        arrivalTime.setResizable(false);  // Enable resizing for Arrival Time column
+       priority.setResizable(false);      // Enable resizing for Priority column
+        //////////////////////////////////////////////////////////////////Tabel/////////////////////////////////////////////////////
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////   Event Handlers  //////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
         //Radio buttons event handling
+
         FCFS_button.setOnAction((e)->{
-            table.setLayoutX(90);
+            table.setLayoutX(100);
             table.getColumns().addAll(processName, burstTime, arrivalTime);
             pane2.getChildren().add(table);
+            grid.getChildren().add(pName);
+            grid.getChildren().add(pBurstTime);
+            grid.getChildren().add(pArrivalTime);
+            grid.getChildren().add(addButton);
+            pane3.getChildren().add(scheduleButton);
         });
         SJS_button.setOnAction((e)->{
-            table.setLayoutX(90);
+            table.setLayoutX(100);
             table.getColumns().addAll(processName, burstTime, arrivalTime);
             pane2.getChildren().add(table);
+            grid.getChildren().add(pName);
+            grid.getChildren().add(pBurstTime);
+            grid.getChildren().add(pArrivalTime);
+            grid.getChildren().add(addButton);
+            pane3.getChildren().add(scheduleButton);
         });
         SRTF_button.setOnAction((e)->{
-            table.setLayoutX(90);
+            table.setLayoutX(100);
             table.getColumns().addAll(processName, burstTime, arrivalTime);
             pane2.getChildren().add(table);
+            grid.getChildren().add(pName);
+            grid.getChildren().add(pBurstTime);
+            grid.getChildren().add(pArrivalTime);
+            grid.getChildren().add(addButton);
+            pane3.getChildren().add(scheduleButton);
         });
         PP_button.setOnAction((e)->{
             table.setLayoutX(60);
             table.getColumns().addAll(processName, burstTime, arrivalTime,priority);
             pane2.getChildren().add(table);
+            grid.getChildren().add(pName);
+            grid.getChildren().add(pBurstTime);
+            grid.getChildren().add(pArrivalTime);
+            grid.getChildren().add(pPriority);
+            grid.getChildren().add(addButton);
+            pane3.getChildren().add(scheduleButton);
+            priorityFlag[0] = true;
         });
         PNP_button.setOnAction((e)->{
             table.setLayoutX(60);
             table.getColumns().addAll(processName, burstTime, arrivalTime,priority);
             pane2.getChildren().add(table);
+            grid.getChildren().add(pName);
+            grid.getChildren().add(pBurstTime);
+            grid.getChildren().add(pArrivalTime);
+            grid.getChildren().add(pPriority);
+            grid.getChildren().add(addButton);
+            pane3.getChildren().add(scheduleButton);
+            priorityFlag[0]=true;
         });
         RR_button.setOnAction((e)->{
-            table.setLayoutX(90);
+            table.setLayoutX(100);
             table.getColumns().addAll(processName, burstTime, arrivalTime);
             pane2.getChildren().add(table);
+            grid.getChildren().add(pName);
+            grid.getChildren().add(pBurstTime);
+            grid.getChildren().add(pArrivalTime);
+            grid.getChildren().add(addButton);
+            pane3.getChildren().add(scheduleButton);
         });
 
+        ;
+// Add button Handler
+        addButton.setOnAction(e -> {
+            // Retrieve input values from text fields
+            try {
 
-//        TableColumn firstNameCol = new TableColumn("First Name");
-//        firstNameCol.setMinWidth(100);
-//
-//        TableColumn lastNameCol = new TableColumn("Last Name");
-//        lastNameCol.setMinWidth(100);
-//        TableColumn emailCol = new TableColumn("Email");
-//        emailCol.setMinWidth(200);
-//        table.setItems(data);
-//        table.getColumns().addAll(firstNameCol, lastNameCol, emailCol);
+                String inputName = pName.getText() ;
+                int inputArrivalTime = Integer.parseInt(pArrivalTime.getText());
+                int inputBurstTime = Integer.parseInt(pBurstTime.getText());
+
+                Process process ;
+              if(priorityFlag[0])
+              {
+                   // If priority is being used
+                  int inputPriority = Integer.parseInt(pPriority.getText());
+                  ObservableList<Process> data = FXCollections.observableArrayList(
+                          process = new Process(inputName, inputArrivalTime, inputBurstTime, inputPriority)
+                  );
+              }
+              else
+              {
+                  ObservableList<Process> data = FXCollections.observableArrayList(
+                          process = new Process(inputName, inputArrivalTime, inputBurstTime)
+                  );
+
+              }
+                table.getItems().add(process);
+                // Clear the TextField contents after adding the process
+                pName.clear();
+                pArrivalTime.clear();
+                pBurstTime.clear();
+                pPriority.clear(); // Clear this if using priority
+
+                processList.add(process);
 
 
-        //Radio buttons event handling
-        //
+            } catch (NumberFormatException ex) {
+                // Handle the case where one or more inputs are not valid integers
+                System.out.println("Please enter valid integers for all fields");
+            }
 
+        });
+        // scheduler button handler
+        scheduleButton.setOnAction(e -> {
+            part2(processList);
+        });
 
-//        Button ok = new Button("ok");
-//        ok.setOnAction((e)->{
-//            System.out.println("hello");
-//        });
-//        pane.add(ok,2,2);
-
-        Scene scene = new Scene(new VBox(pane,pane2) ,450,550);
-        stage.setTitle("Hello!");
+// Create a VBox to hold your GridPane and other components
+        VBox vbox = new VBox();
+// Add the GridPane to the VBox
+        vbox.getChildren().addAll(pane,pane2,grid,pane3);
+// Create the scene with the VBox
+        Scene scene = new Scene(vbox, 450, 680);
+// Set the scene to the stage
         stage.setScene(scene);
         stage.show();
     }
 
+
+void part2 (List<Process> processList) {
+   // Print processes for debugging
+    printProcessList();
+}
     public static void main(String[] args) {
 
         launch();
