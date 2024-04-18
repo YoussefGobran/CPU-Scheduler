@@ -4,24 +4,25 @@ public class Process {
     //data field of any process
     private String process_name ;
     private int burst_time;
-    private int priority;
+    private int priority ;
     private int arrival_time;
     private int remaining ;
     //constructors
     //In case of FCFS or RoundRobin
-    Process(int aTime , int bTime)
+     Process(String pName , int aTime , int bTime)
     {
+        this.process_name = pName;
         this.arrival_time=aTime;
         this.burst_time= bTime;
-        this.priority=0;
         remaining = bTime;
     }
     //In case of priority or sjf in both cases
-    Process(int aTime , int bTime,int pri)
+     Process(String pName , int aTime , int bTime,int pri)
     {
+        this.process_name = pName;
         this.arrival_time=aTime;
         this.burst_time= bTime;
-        this.priority=pri;
+        this.priority = pri;
         remaining = bTime;
     }
 

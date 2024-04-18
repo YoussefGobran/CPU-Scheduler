@@ -1,11 +1,14 @@
 package com.example.cpu_scheduler;
 
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -15,6 +18,7 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class HelloApplication extends Application implements EventHandler<ActionEvent> {
     private List<Process> processList = new ArrayList<>();
@@ -27,23 +31,57 @@ public class HelloApplication extends Application implements EventHandler<Action
     }
     @Override
     public void start(Stage stage) throws IOException {
+        //flags
+        AtomicBoolean priorityFlag = new AtomicBoolean(false);
         //set stage
         stage.setResizable(true);
 
         //setting pane
-        GridPane pane = new GridPane();
+        GridPane pane = new GridPane(); //radio buttons holder
         pane.setHgap(8); // Set horizontal gap
         pane.setVgap(32); // Set vertical gap
         pane.setPadding(new Insets(4, 48, 48, 48));
 
-        Pane pane2 = new Pane();
-
+        Pane pane2 = new Pane(); // tabel holder
         pane2.setPadding(new Insets(4, 48, 48, 48));
 
+        GridPane grid = new GridPane(); //text fields and add button holder
+        grid.setPadding(new Insets(10, 10, 10, 10));
+        grid.setVgap(5);
+        grid.setHgap(5);
 
         //text set
         Text t = new Text (10, 20, "choose scheduler");
         pane.add(t,0,1);
+
+        //Text Fields
+        //Creating a GridPane container
+
+
+        final TextField pName = new TextField();
+        pName.setPromptText("Enter process Name/Number");
+        pName.setPrefColumnCount(15);
+        GridPane.setConstraints(pName, 5, 5);
+
+        final TextField pArrivalTime = new TextField();
+        pArrivalTime.setPromptText("Enter process Arrival Time");
+        pArrivalTime.setPrefColumnCount(15);
+        GridPane.setConstraints(pArrivalTime, 9, 5);
+
+        final TextField pBurstTime = new TextField();
+        pBurstTime.setPromptText("Enter process Burst Time");
+        pBurstTime.setPrefColumnCount(15);
+        GridPane.setConstraints(pBurstTime, 7, 5);
+
+        final TextField pPriority = new TextField();
+        pPriority.setPromptText("Enter process Priority");
+        pPriority.setPrefColumnCount(15);
+        GridPane.setConstraints(pPriority, 11, 5);
+
+        // Add process button
+        Button addButton = new Button("Add Process");
+        GridPane.setConstraints(addButton, 5, 7);
+
         //Radio buttons setting
         ToggleGroup group = new ToggleGroup();
         RadioButton FCFS_button = new RadioButton("FCFS");
@@ -64,172 +102,142 @@ public class HelloApplication extends Application implements EventHandler<Action
         RadioButton RR_button = new RadioButton("ROUND_ROBIN");
         RR_button.setToggleGroup(group);
         pane.add(RR_button,0,3);
-//// Add event handlers to PP and PNP buttons
-//
-//        PP_button.setOnAction(e -> {
-//            if (PP_button.isSelected()) {
-//                PNP_button.setSelected(false); // Unselect PNP if PP is selected
-//            }
-//        });
-//
-//        PNP_button.setOnAction(e -> {
-//            if (PNP_button.isSelected()) {
-//                PP_button.setSelected(false); // Unselect PP if PNP is selected
-//            }
-//        });
 
         //Table setting
         TableView <Process> table= new TableView<Process>();
         table.setPrefHeight(300);
+        //set table column
+        TableColumn<Process, String> processName = new TableColumn<>("processName");
+        processName.setCellValueFactory(new PropertyValueFactory<>("process_name"));
 
-        TableColumn processName = new TableColumn("Process Name");
-        TableColumn burstTime = new TableColumn("Burst Time");
-        TableColumn arrivalTime = new TableColumn("Arrival Time");
-        TableColumn priority = new TableColumn("PRIORITY");
+        TableColumn<Process, Integer> burstTime = new TableColumn<>("Burst Time");
+        burstTime.setCellValueFactory(new PropertyValueFactory<>("burst_time"));
 
+        TableColumn<Process, Integer> arrivalTime = new TableColumn<>("Arrival Time");
+        arrivalTime.setCellValueFactory(new PropertyValueFactory<>("arrival_time"));
+
+        TableColumn<Process, Integer> priority = new TableColumn<>("PRIORITY");
+        priority.setCellValueFactory(new PropertyValueFactory<>("priority"));
+
+        //////////////////////////////////////////////////////////////////Tabel/////////////////////////////////////////////////////
 // Clear existing columns before adding new ones
-        table.getColumns().clear();
-        // Define a class to hold the selected algorithm
-        class SelectedAlgorithm {
-            String algorithm = "";
+        //table.getColumns().clear();
 
-            public void setAlgorithm(String algorithm) {
-                this.algorithm = algorithm;
-            }
+//// Set column alignment and resizing
+//        processName.setSortable(false); // Example: Disable sorting for Process Name column
+//        burstTime.setSortable(false);    // Enable sorting for Burst Time column
+//        arrivalTime.setSortable(false);  // Enable sorting for Arrival Time column
+//        priority.setSortable(false);      // Enable sorting for Priority column
+//
+//// Set column resizing
+//        processName.setResizable(false); // Example: Disable resizing for Process Name column
+//        burstTime.setResizable(false);    // Enable resizing for Burst Time column
+//        arrivalTime.setResizable(false);  // Enable resizing for Arrival Time column
+//        priority.setResizable(false);      // Enable resizing for Priority column
+        //////////////////////////////////////////////////////////////////Tabel/////////////////////////////////////////////////////
 
-            public String getAlgorithm() {
-                return algorithm;
-            }
-        }
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////   Event Handlers  //////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Create an instance of the class
-        SelectedAlgorithm selectedAlgorithm = new SelectedAlgorithm();
-
-// Set up event handlers for radio buttons to update the selectedAlgorithm object
-        FCFS_button.setOnAction((e) -> {
-            selectedAlgorithm.setAlgorithm("FCFS");
-        });
-
-        SJS_button.setOnAction((e) -> {
-            selectedAlgorithm.setAlgorithm("SJS");
-
-        });
-
-// Similar event handlers for other radio buttons...
-
-        PP_button.setOnAction((e) -> {
-            selectedAlgorithm.setAlgorithm("PP");
-            // Additional actions if needed
-        });
-
-        PNP_button.setOnAction((e) -> {
-            selectedAlgorithm.setAlgorithm("PNP");
-            // Additional actions if needed
-        });
-
-        RR_button.setOnAction((e) -> {
-            selectedAlgorithm.setAlgorithm("RR");
-            // Additional actions if needed
-        });
-
-// Add columns based on the selected scheduling algorithm
-//        if (selectedAlgorithm.getAlgorithm().equals("FCFS") || selectedAlgorithm.getAlgorithm().equals("SJS") || selectedAlgorithm.getAlgorithm().equals("SRTF") || selectedAlgorithm.getAlgorithm().equals("RR")) {
-//            table.getColumns().addAll(processName, burstTime, arrivalTime);
-//        } else if (selectedAlgorithm.getAlgorithm().equals("PP") || selectedAlgorithm.getAlgorithm().equals("PNP")) {
-//            table.getColumns().addAll(processName, burstTime, arrivalTime, priority);
-//        }
-
-// Set column alignment and resizing
-        processName.setSortable(false); // Example: Disable sorting for Process Name column
-        burstTime.setSortable(true);    // Enable sorting for Burst Time column
-        arrivalTime.setSortable(true);  // Enable sorting for Arrival Time column
-        priority.setSortable(true);      // Enable sorting for Priority column
-
-// Set column resizing
-        processName.setResizable(false); // Example: Disable resizing for Process Name column
-        burstTime.setResizable(true);    // Enable resizing for Burst Time column
-        arrivalTime.setResizable(true);  // Enable resizing for Arrival Time column
-        priority.setResizable(true);      // Enable resizing for Priority column
         //Radio buttons event handling
+
         FCFS_button.setOnAction((e)->{
             table.setLayoutX(90);
             table.getColumns().addAll(processName, burstTime, arrivalTime);
             pane2.getChildren().add(table);
+            grid.getChildren().add(pName);
+            grid.getChildren().add(pBurstTime);
+            grid.getChildren().add(pArrivalTime);
+            grid.getChildren().add(addButton);
         });
         SJS_button.setOnAction((e)->{
             table.setLayoutX(90);
             table.getColumns().addAll(processName, burstTime, arrivalTime);
             pane2.getChildren().add(table);
+            grid.getChildren().add(pName);
+            grid.getChildren().add(pBurstTime);
+            grid.getChildren().add(pArrivalTime);
+            grid.getChildren().add(addButton);
         });
         SRTF_button.setOnAction((e)->{
             table.setLayoutX(90);
             table.getColumns().addAll(processName, burstTime, arrivalTime);
             pane2.getChildren().add(table);
+            grid.getChildren().add(pName);
+            grid.getChildren().add(pBurstTime);
+            grid.getChildren().add(pArrivalTime);
+            grid.getChildren().add(addButton);
         });
         PP_button.setOnAction((e)->{
             table.setLayoutX(60);
             table.getColumns().addAll(processName, burstTime, arrivalTime,priority);
             pane2.getChildren().add(table);
+            grid.getChildren().add(pName);
+            grid.getChildren().add(pBurstTime);
+            grid.getChildren().add(pArrivalTime);
+            grid.getChildren().add(pPriority);
+            grid.getChildren().add(addButton);
+            priorityFlag.set(true);
         });
         PNP_button.setOnAction((e)->{
             table.setLayoutX(60);
             table.getColumns().addAll(processName, burstTime, arrivalTime,priority);
             pane2.getChildren().add(table);
+            grid.getChildren().add(pName);
+            grid.getChildren().add(pBurstTime);
+            grid.getChildren().add(pArrivalTime);
+            grid.getChildren().add(pPriority);
+            grid.getChildren().add(addButton);
+            priorityFlag.set(true);
         });
         RR_button.setOnAction((e)->{
             table.setLayoutX(90);
             table.getColumns().addAll(processName, burstTime, arrivalTime);
             pane2.getChildren().add(table);
+            grid.getChildren().add(pName);
+            grid.getChildren().add(pBurstTime);
+            grid.getChildren().add(pArrivalTime);
+            grid.getChildren().add(addButton);
         });
-//Creating a GridPane container
-        GridPane grid = new GridPane();
-        grid.setPadding(new Insets(10, 10, 10, 10));
-        grid.setVgap(5);
-        grid.setHgap(5);
-        final TextField pName = new TextField();
-        pName.setPromptText("Enter process Name/Number");
-        pName.setPrefColumnCount(15);
-        GridPane.setConstraints(pName, 5, 5);
-        grid.getChildren().add(pName);
 
-        final TextField pArrivalTime = new TextField();
-        pArrivalTime.setPromptText("Enter process Arrival Time");
-        pArrivalTime.setPrefColumnCount(15);
-        GridPane.setConstraints(pArrivalTime, 7, 5);
-        grid.getChildren().add(pArrivalTime);
-
-        final TextField pBurstTime = new TextField();
-        pBurstTime.setPromptText("Enter process Burst Time");
-        pBurstTime.setPrefColumnCount(15);
-        GridPane.setConstraints(pBurstTime, 9, 5);
-        grid.getChildren().add(pBurstTime);
-        final TextField pPriority = new TextField();
-        pPriority.setPromptText("Enter process Priority");
-        pPriority.setPrefColumnCount(15);
-        GridPane.setConstraints(pPriority, 11, 5);
-        grid.getChildren().add(pPriority);
-
-        Button addButton = new Button("Add Process");
+        ;
+// Add button Handler
         addButton.setOnAction(e -> {
             // Retrieve input values from text fields
             try {
-//                String inputName = pName.getText() ;
+
+                String inputName = pName.getText() ;
                 int inputArrivalTime = Integer.parseInt(pArrivalTime.getText());
                 int inputBurstTime = Integer.parseInt(pBurstTime.getText());
-                int inputPriority = Integer.parseInt(pPriority.getText()); // If priority is being used
 
-                // Create a new Process object
-                Process process = new Process(inputArrivalTime, inputBurstTime, inputPriority); // Use the priority constructor if needed
-                processList.add(process);
+                Process process ;
+              if(priorityFlag.equals(true))
+              {
+                   // If priority is being used
+                  int inputPriority = Integer.parseInt(pPriority.getText());
+                  ObservableList<Process> data = FXCollections.observableArrayList(
+                          process = new Process(inputName, inputArrivalTime, inputBurstTime, inputPriority)
+                  );
+              }
+              else
+              {
+                  ObservableList<Process> data = FXCollections.observableArrayList(
+                          process = new Process(inputName, inputArrivalTime, inputBurstTime)
+                  );
 
+              }
+                table.getItems().add(process);
                 // Clear the TextField contents after adding the process
                 pName.clear();
                 pArrivalTime.clear();
                 pBurstTime.clear();
                 pPriority.clear(); // Clear this if using priority
 
+                processList.add(process);
 //              Print processes for debugging
-//                printProcessList();
+                printProcessList();
+
             } catch (NumberFormatException ex) {
                 // Handle the case where one or more inputs are not valid integers
                 System.out.println("Please enter valid integers for all fields");
@@ -241,7 +249,7 @@ public class HelloApplication extends Application implements EventHandler<Action
         VBox vbox = new VBox();
 
 // Add the GridPane to the VBox
-        vbox.getChildren().addAll(pane,pane2,addButton,grid);
+        vbox.getChildren().addAll(pane,pane2,grid);
 
 // Create the scene with the VBox
         Scene scene = new Scene(vbox, 400, 400);
@@ -252,6 +260,7 @@ public class HelloApplication extends Application implements EventHandler<Action
         stage.setScene(scene);
         stage.show();
     }
+
 
 
     public static void main(String[] args) {
