@@ -32,10 +32,10 @@ public class HelloApplication extends Application implements EventHandler<Action
     @Override
     public void start(Stage stage) throws IOException {
         //flags
-        AtomicBoolean priorityFlag = new AtomicBoolean(false);
+        final boolean[] priorityFlag = {false};
         //set stage
-        stage.setResizable(true);
-
+        stage.setResizable(false);
+        stage.setTitle("CPU SCHEDULER - ENG ASU");
         //setting pane
         GridPane pane = new GridPane(); //radio buttons holder
         pane.setHgap(8); // Set horizontal gap
@@ -43,12 +43,15 @@ public class HelloApplication extends Application implements EventHandler<Action
         pane.setPadding(new Insets(4, 48, 48, 48));
 
         Pane pane2 = new Pane(); // tabel holder
-        pane2.setPadding(new Insets(4, 48, 48, 48));
+        pane2.setPadding(new Insets(4, 48, 10, 48));
 
         GridPane grid = new GridPane(); //text fields and add button holder
         grid.setPadding(new Insets(10, 10, 10, 10));
         grid.setVgap(5);
         grid.setHgap(5);
+
+        Pane pane3 = new Pane(); // schedular button holder
+        pane3.setPadding(new Insets(4, 48, 10, 48));
 
         //text set
         Text t = new Text (10, 20, "choose scheduler");
@@ -59,28 +62,32 @@ public class HelloApplication extends Application implements EventHandler<Action
 
 
         final TextField pName = new TextField();
-        pName.setPromptText("Enter process Name/Number");
+        pName.setPromptText("process Name");
         pName.setPrefColumnCount(15);
         GridPane.setConstraints(pName, 5, 5);
 
         final TextField pArrivalTime = new TextField();
-        pArrivalTime.setPromptText("Enter process Arrival Time");
+        pArrivalTime.setPromptText("Arrival Time");
         pArrivalTime.setPrefColumnCount(15);
         GridPane.setConstraints(pArrivalTime, 9, 5);
 
         final TextField pBurstTime = new TextField();
-        pBurstTime.setPromptText("Enter process Burst Time");
+        pBurstTime.setPromptText("Burst Time");
         pBurstTime.setPrefColumnCount(15);
         GridPane.setConstraints(pBurstTime, 7, 5);
 
         final TextField pPriority = new TextField();
-        pPriority.setPromptText("Enter process Priority");
+        pPriority.setPromptText("Priority");
         pPriority.setPrefColumnCount(15);
-        GridPane.setConstraints(pPriority, 11, 5);
+        GridPane.setConstraints(pPriority, 10, 5);
 
         // Add process button
         Button addButton = new Button("Add Process");
         GridPane.setConstraints(addButton, 5, 7);
+
+        Button scheduleButton = new Button("Schedule Processes");
+        scheduleButton.setLayoutX(168);
+        //GridPane.setConstraints(scheduleButton, 9, 8);
 
         //Radio buttons setting
         ToggleGroup group = new ToggleGroup();
@@ -120,20 +127,17 @@ public class HelloApplication extends Application implements EventHandler<Action
         priority.setCellValueFactory(new PropertyValueFactory<>("priority"));
 
         //////////////////////////////////////////////////////////////////Tabel/////////////////////////////////////////////////////
-// Clear existing columns before adding new ones
-        //table.getColumns().clear();
+// Set column alignment and resizing
+        processName.setSortable(false); // Example: Disable sorting for Process Name column
+        burstTime.setSortable(false);    // Enable sorting for Burst Time column
+        arrivalTime.setSortable(false);  // Enable sorting for Arrival Time column
+        priority.setSortable(false);      // Enable sorting for Priority column
 
-//// Set column alignment and resizing
-//        processName.setSortable(false); // Example: Disable sorting for Process Name column
-//        burstTime.setSortable(false);    // Enable sorting for Burst Time column
-//        arrivalTime.setSortable(false);  // Enable sorting for Arrival Time column
-//        priority.setSortable(false);      // Enable sorting for Priority column
-//
-//// Set column resizing
-//        processName.setResizable(false); // Example: Disable resizing for Process Name column
-//        burstTime.setResizable(false);    // Enable resizing for Burst Time column
-//        arrivalTime.setResizable(false);  // Enable resizing for Arrival Time column
-//        priority.setResizable(false);      // Enable resizing for Priority column
+// Set column resizing
+        processName.setResizable(false); // Example: Disable resizing for Process Name column
+        burstTime.setResizable(false);    // Enable resizing for Burst Time column
+        arrivalTime.setResizable(false);  // Enable resizing for Arrival Time column
+       priority.setResizable(false);      // Enable resizing for Priority column
         //////////////////////////////////////////////////////////////////Tabel/////////////////////////////////////////////////////
 
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -143,31 +147,34 @@ public class HelloApplication extends Application implements EventHandler<Action
         //Radio buttons event handling
 
         FCFS_button.setOnAction((e)->{
-            table.setLayoutX(90);
+            table.setLayoutX(100);
             table.getColumns().addAll(processName, burstTime, arrivalTime);
             pane2.getChildren().add(table);
             grid.getChildren().add(pName);
             grid.getChildren().add(pBurstTime);
             grid.getChildren().add(pArrivalTime);
             grid.getChildren().add(addButton);
+            pane3.getChildren().add(scheduleButton);
         });
         SJS_button.setOnAction((e)->{
-            table.setLayoutX(90);
+            table.setLayoutX(100);
             table.getColumns().addAll(processName, burstTime, arrivalTime);
             pane2.getChildren().add(table);
             grid.getChildren().add(pName);
             grid.getChildren().add(pBurstTime);
             grid.getChildren().add(pArrivalTime);
             grid.getChildren().add(addButton);
+            pane3.getChildren().add(scheduleButton);
         });
         SRTF_button.setOnAction((e)->{
-            table.setLayoutX(90);
+            table.setLayoutX(100);
             table.getColumns().addAll(processName, burstTime, arrivalTime);
             pane2.getChildren().add(table);
             grid.getChildren().add(pName);
             grid.getChildren().add(pBurstTime);
             grid.getChildren().add(pArrivalTime);
             grid.getChildren().add(addButton);
+            pane3.getChildren().add(scheduleButton);
         });
         PP_button.setOnAction((e)->{
             table.setLayoutX(60);
@@ -178,7 +185,8 @@ public class HelloApplication extends Application implements EventHandler<Action
             grid.getChildren().add(pArrivalTime);
             grid.getChildren().add(pPriority);
             grid.getChildren().add(addButton);
-            priorityFlag.set(true);
+            pane3.getChildren().add(scheduleButton);
+            priorityFlag[0] = true;
         });
         PNP_button.setOnAction((e)->{
             table.setLayoutX(60);
@@ -189,16 +197,18 @@ public class HelloApplication extends Application implements EventHandler<Action
             grid.getChildren().add(pArrivalTime);
             grid.getChildren().add(pPriority);
             grid.getChildren().add(addButton);
-            priorityFlag.set(true);
+            pane3.getChildren().add(scheduleButton);
+            priorityFlag[0]=true;
         });
         RR_button.setOnAction((e)->{
-            table.setLayoutX(90);
+            table.setLayoutX(100);
             table.getColumns().addAll(processName, burstTime, arrivalTime);
             pane2.getChildren().add(table);
             grid.getChildren().add(pName);
             grid.getChildren().add(pBurstTime);
             grid.getChildren().add(pArrivalTime);
             grid.getChildren().add(addButton);
+            pane3.getChildren().add(scheduleButton);
         });
 
         ;
@@ -212,7 +222,7 @@ public class HelloApplication extends Application implements EventHandler<Action
                 int inputBurstTime = Integer.parseInt(pBurstTime.getText());
 
                 Process process ;
-              if(priorityFlag.equals(true))
+              if(priorityFlag[0])
               {
                    // If priority is being used
                   int inputPriority = Integer.parseInt(pPriority.getText());
@@ -235,8 +245,7 @@ public class HelloApplication extends Application implements EventHandler<Action
                 pPriority.clear(); // Clear this if using priority
 
                 processList.add(process);
-//              Print processes for debugging
-                printProcessList();
+
 
             } catch (NumberFormatException ex) {
                 // Handle the case where one or more inputs are not valid integers
@@ -244,25 +253,27 @@ public class HelloApplication extends Application implements EventHandler<Action
             }
 
         });
+        // scheduler button handler
+        scheduleButton.setOnAction(e -> {
+            part2(processList);
+        });
 
 // Create a VBox to hold your GridPane and other components
         VBox vbox = new VBox();
-
 // Add the GridPane to the VBox
-        vbox.getChildren().addAll(pane,pane2,grid);
-
+        vbox.getChildren().addAll(pane,pane2,grid,pane3);
 // Create the scene with the VBox
-        Scene scene = new Scene(vbox, 400, 400);
-
+        Scene scene = new Scene(vbox, 450, 680);
 // Set the scene to the stage
-
-        stage.setTitle("Hello!");
         stage.setScene(scene);
         stage.show();
     }
 
 
-
+void part2 (List<Process> processList) {
+   // Print processes for debugging
+    printProcessList();
+}
     public static void main(String[] args) {
 
         launch();
