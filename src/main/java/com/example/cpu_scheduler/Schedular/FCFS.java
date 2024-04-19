@@ -1,62 +1,80 @@
-import java.util.ArrayList; 
+package com.example.cpu_scheduler.Schedular;
 
-abstract class Scheduler {
-    protected ArrayList<Process> queue;
+import com.example.cpu_scheduler.Process;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
 
-    Scheduler() {
-        queue = new ArrayList<>();
+public class FCFS extends Schedular {
+
+  Queue<Process> queue;
+  List<Process> processesList;
+  int counter = 0;
+  Process p;
+  FCFS(List<Process> proArr) {
+    queue = new LinkedList<>();
+
+    processesList = new ArrayList<Process>(proArr.size());
+    for (int i = 0; i < proArr.size(); i++) {
+      processesList.add(proArr.get(i));
     }
 
-    abstract boolean hasProcess();
-
-    abstract void insertProcess(Process process);
-
-    abstract Process currentProcess();
-}
-
-class FCFS extends  /*  Scheduler اكتب هن يسطا اسم الكلاس الاساسي*/ {
-
-    FCFS() {
-        super();
-    }
-
-    @Override
-    boolean hasProcess() {
-        return !queue.isEmpty();
-    }
-
-    @Override
-    void insertProcess(Process process) {
-        queue.add(process);
-    }
-
-    @Override
-    Process currentProcess() {
-        if (!queue.isEmpty()) {
-            return queue.get(0);
-        } else {
-            return null;
+    Collections.sort(
+      processesList,
+      new Comparator<Process>() {
+        public int compare(Process p1, Process p2) {
+          int res = p1.getArrival_time() - p2.getArrival_time();
+          if (res == 0) {
+            res += (p1.getBurst_time() - p2.getBurst_time());
+          }
+          return res;
         }
+      }
+    );
+  }
+
+  @Override
+  boolean processEmpty() {
+    return queue.isEmpty() && counter == processesList.size();
+  }
+
+  @Override
+  String getProcessNameNow(int currentTime) {
+    while (
+      counter < processesList.size() &&
+      currentTime > processesList.get(counter).getArrival_time()
+    ) {
+      queue.offer(processesList.get(counter));
+      counter++;
     }
-
-    void runScheduler() throws InterruptedException {
-        int currentTime = 0;
-
-        synchronized (this) {
-            while (hasProcess()) {
-                Process currentProcess = queue.remove(0);
-                /*System.out.println("Processing " + currentProcess.name + " at time " + currentTime);*/
-                /*اكتب هنا اللي انت مستنيه عندك يسمع في الجي يو اي مثلا فلاج او حاجة شوف انت اللوجيك عندك ازاي */
-                try {
-                    Thread.sleep(1000 * currentProcess.burstTime); //هنا انا بعطل لتايم يونيت
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                    Thread.currentThread().interrupt(); 
-                }
-
-                currentTime += currentProcess.burstTime;
-            }
-           // System.out.println("CPU idle");اكتب بقى هنا الللي يسمع في ال جي يو اي انه ايدل
-        }
+    String res="";
+    if(p==null){
+      if(queue.isEmpty()){
+        return "";
+      }
+      p = queue.poll();  
     }
+    p.setBurst_time(p.getBurst_time() - 1);
+    res=p.getProcess_name();
+    if(p.getBurst_time()<=0){
+      p=null;
+    }
+    return res;
+  }
+
+  @Override
+  void insertProcess(
+    String name,
+    int currentTime,
+    int burstTime,
+    int priority
+  ) {
+    processesList.add(
+      counter,
+      new Process(name, currentTime, burstTime, priority)
+    );
+  }
 }

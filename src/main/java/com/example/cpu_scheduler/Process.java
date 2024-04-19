@@ -9,7 +9,7 @@ public class Process {
     private int remaining ;
     //constructors
     //In case of FCFS or RoundRobin
-     Process(String pName , int aTime , int bTime)
+    public Process(String pName , int aTime , int bTime)
     {
         this.process_name = pName;
         this.arrival_time=aTime;
@@ -17,7 +17,7 @@ public class Process {
         remaining = bTime;
     }
     //In case of priority or sjf in both cases
-     Process(String pName , int aTime , int bTime,int pri)
+    public Process(String pName , int aTime , int bTime,int pri)
     {
         this.process_name = pName;
         this.arrival_time=aTime;
