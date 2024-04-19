@@ -39,6 +39,7 @@ class PriorityPrimitiveSchedular{
       }
   });
   }
+
   boolean processEmpty(){
     return queue.isEmpty();
   }
