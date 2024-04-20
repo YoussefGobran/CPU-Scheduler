@@ -305,7 +305,7 @@ public class HelloApplication extends Application implements EventHandler<Action
 
         //  scene 2
 //        Label label2 = new Label("Output");
-        Button switchToScene1Butt = new Button("Go to scene 1");
+        Button switchToScene1Butt = new Button("Go to Main Page");
          schedulerLabel = new Label(scheduler);
         schedulerLabel.setAlignment(Pos.TOP_RIGHT);
 
@@ -322,12 +322,11 @@ public class HelloApplication extends Application implements EventHandler<Action
 
         vbox1.getChildren().addAll( switchToScene1Butt, schedulerLabel, timeLabel,
                 drawGantChartBtn,avgWaiting,avgTurn);
-        scene2 = new Scene(vbox1, 500, 450);
-
-            //button actions
+        HBox box = new HBox();
         liveScheduling.setOnAction(e -> {
             output = scheduleProcessing(processList,scheduler,currentTime);
             isLive= true ;
+//            vbox1.getChildren().add(box) ;
              stage.setScene(scene2);
         });
         nonLiveScheduling.setOnAction(e->
@@ -336,6 +335,40 @@ public class HelloApplication extends Application implements EventHandler<Action
             stage.setScene(scene2);
 
         });
+
+        final TextField ppName = new TextField();
+        pName.setPromptText("process Name");
+        pName.setPrefColumnCount(15);
+        GridPane.setConstraints(pName, 5, 5);
+
+        final TextField ppArrivalTime = new TextField();
+        pArrivalTime.setPromptText("Arrival Time");
+        pArrivalTime.setPrefColumnCount(15);
+        GridPane.setConstraints(pArrivalTime, 9, 5);
+
+        final TextField ppBurstTime = new TextField();
+        pBurstTime.setPromptText("Burst Time");
+        pBurstTime.setPrefColumnCount(15);
+        GridPane.setConstraints(pBurstTime, 7, 5);
+
+        final TextField ppPriority = new TextField();
+        pPriority.setPromptText("Priority");
+        pPriority.setPrefColumnCount(15);
+        GridPane.setConstraints(pPriority, 10, 5);
+
+        // Add process button
+        Button addButton2 = new Button("Add Process");
+        box.getChildren().addAll(ppName,ppArrivalTime,ppBurstTime,ppPriority,addButton2);
+        addButton2.setOnAction(e-> {
+            schedulerInstance.insertProcess(ppName.getText(),currentTime,Integer.parseInt(ppBurstTime.getText()),Integer.parseInt(ppPriority.getText()));
+        });
+//        Integer.parseInt(pArrivalTime.getText());
+//        if(isLive){
+//            vbox1.getChildren().add(box) ;
+//        }
+        scene2 = new Scene(vbox1, 500, 450);
+
+            //button actions
         switchToScene1Butt.setOnAction(e-> stage.setScene(scene1));
 
         //scene 3
@@ -412,7 +445,8 @@ public class HelloApplication extends Application implements EventHandler<Action
 //        String[] rectangleNames = {"Rectangle 1", "Rectangle 2", "Rectangle 3"};
 // youssef
         timeline = new Timeline(
-                new KeyFrame(Duration.seconds(1), event -> {
+
+                new KeyFrame(Duration.seconds(isLive?1:0.005), event -> {
                     String name = schedulerInstance.getProcessNameNow(currentTime) ;
                     if (schedulerInstance.processEmpty()) {
                         avgWaiting.setText("Avg waiting time "+ schedulerInstance.getAverageWaitingTime());
