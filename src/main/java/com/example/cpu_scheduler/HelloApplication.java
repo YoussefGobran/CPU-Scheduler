@@ -42,6 +42,7 @@ public class HelloApplication extends Application implements EventHandler<Action
     Rectangle rect ;
     double xCoordinate ;
     Boolean isLive = false ;
+    Label avgTurn , avgWaiting ;
 //    public void printProcessList() {
 //        System.out.println("Current List of Processes:");
 //        for (Process process : processList) {
@@ -312,11 +313,15 @@ public class HelloApplication extends Application implements EventHandler<Action
         timeLabel = new Label("Counter: "+currentTime);
         Button drawGantChartBtn = new Button("Draw Gant Chart") ;
 
+         avgTurn = new Label( ) ;
+         avgWaiting = new Label( ) ;
 
 
         VBox vbox1 = new VBox(20);
         vbox1.setAlignment(Pos.TOP_LEFT);
-        vbox1.getChildren().addAll( switchToScene1Butt, schedulerLabel, timeLabel,drawGantChartBtn);
+
+        vbox1.getChildren().addAll( switchToScene1Butt, schedulerLabel, timeLabel,
+                drawGantChartBtn,avgWaiting,avgTurn);
         scene2 = new Scene(vbox1, 500, 450);
 
             //button actions
@@ -361,8 +366,11 @@ public class HelloApplication extends Application implements EventHandler<Action
 //            while(schedulerInstance.processEmpty())
             // Create a Timeline with a KeyFrame that runs every 3 seconds
             StackPane root = drawGantChart(output);
-            scene3Vbox.getChildren().add(root); // Add new updated Gantt chart
-            stage.setScene(scene3); // Set scene after updating contents
+            root.setAlignment(Pos.CENTER_RIGHT);
+            vbox1.getChildren().add(root) ;
+
+//            scene3Vbox.getChildren().add(root); // Add new updated Gantt chart
+//            stage.setScene(scene3); // Set scene after updating contents
         });
 
 // Set this scene configuration once if not dynamic or needs refresh every time
@@ -405,10 +413,14 @@ public class HelloApplication extends Application implements EventHandler<Action
 // youssef
         timeline = new Timeline(
                 new KeyFrame(Duration.seconds(1), event -> {
-                    if (schedulerInstance.processEmpty()) {
-                        timeline.stop(); // Stop the timeline if flag is false
-                    }
                     String name = schedulerInstance.getProcessNameNow(currentTime) ;
+                    if (schedulerInstance.processEmpty()) {
+                        avgWaiting.setText("Avg waiting time "+ schedulerInstance.getAverageWaitingTime());
+                        avgTurn.setText("Avg turnaround time "+ schedulerInstance.getAverageTurnAroundTime());
+                        timeline.stop();// Stop the timeline if flag is false
+
+                    }
+
                     System.out.println(name);
                     rectangleWithLabel = createRectangleWithLabel(name,
                              xPosition, 60, 40);
