@@ -1,4 +1,4 @@
-package com.example.cpu_scheduler.Schedular;
+package com.example.cpu_scheduler.Scheduler;
 
 import com.example.cpu_scheduler.Process;
 import java.util.ArrayList;
@@ -7,19 +7,20 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.PriorityQueue;
 
-class SRTF extends Schedular {
+public class PriorityNonPrimitive extends Scheduler {
 
   PriorityQueue<Process> queue;
+  Process p;
   int counter = 0;
 
-  SRTF(List<Process> proArr) {
+  public PriorityNonPrimitive(List<Process> proArr) {
     queue =
       new PriorityQueue<>(
         new Comparator<Process>() {
           public int compare(Process p1, Process p2) {
-            int res = p1.getBurst_time() - p2.getBurst_time();
+            int res = p1.getPriority() - p2.getPriority();
             if (res == 0) {
-              res += (p1.getArrival_time() - p2.getArrival_time());
+              res += (p1.getBurst_time() - p2.getBurst_time());
             }
             return res;
           }
@@ -59,17 +60,19 @@ class SRTF extends Schedular {
       counter++;
     }
 
-    if (queue.isEmpty()) {
-      return "";
+    if (p == null) {
+      if (queue.isEmpty()) {
+        return "";
+      }
+      p = queue.poll();
     }
-    Process p = queue.poll();
     p.setBurst_time(p.getBurst_time() - 1);
-    if (p.getBurst_time() >= 1) {
-      queue.offer(p);
-    }else{
-      p.setFinalTime(currentTime+1);
+    String res = p.getProcess_name();
+    if (p.getBurst_time() <= 0) {
+      p.setFinalTime(currentTime + 1);
+      p = null;
     }
-    return p.getProcess_name();
+    return res;
   }
 
   @Override

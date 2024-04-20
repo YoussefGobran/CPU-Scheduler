@@ -1,4 +1,4 @@
-package com.example.cpu_scheduler.Schedular;
+package com.example.cpu_scheduler.Scheduler;
 
 import com.example.cpu_scheduler.Process;
 import java.util.ArrayList;
@@ -7,19 +7,19 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.PriorityQueue;
 
-class PriorityPrimitiveSchedular extends Schedular {
+public class SRTF extends Scheduler {
 
   PriorityQueue<Process> queue;
   int counter = 0;
 
-  PriorityPrimitiveSchedular(List<Process> proArr) {
+  public SRTF(List<Process> proArr) {
     queue =
       new PriorityQueue<>(
         new Comparator<Process>() {
           public int compare(Process p1, Process p2) {
-            int res = p1.getPriority() - p2.getPriority();
+            int res = p1.getBurst_time() - p2.getBurst_time();
             if (res == 0) {
-              res += (p1.getBurst_time() - p2.getBurst_time());
+              res += (p1.getArrival_time() - p2.getArrival_time());
             }
             return res;
           }
@@ -66,8 +66,8 @@ class PriorityPrimitiveSchedular extends Schedular {
     p.setBurst_time(p.getBurst_time() - 1);
     if (p.getBurst_time() >= 1) {
       queue.offer(p);
-    } else {
-      p.setFinalTime(currentTime + 1);
+    }else{
+      p.setFinalTime(currentTime+1);
     }
     return p.getProcess_name();
   }

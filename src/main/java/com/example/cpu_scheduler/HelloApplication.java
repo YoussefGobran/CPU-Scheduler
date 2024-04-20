@@ -1,5 +1,9 @@
 package com.example.cpu_scheduler;
 
+import com.example.cpu_scheduler.Scheduler.*;
+import javafx.animation.KeyFrame;
+import javafx.animation.PauseTransition;
+import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -10,49 +14,51 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
 import javafx.util.Duration;
 
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class HelloApplication extends Application implements EventHandler<ActionEvent> {
+    private Timeline timeline;
+    double xPosition = 0; // Initial x position for the first rectangle
     private List<Process> processList = new ArrayList<>();
+    private List<Process> newList = new ArrayList<>();
+    private List<Process> output = new ArrayList<>();
     String scheduler = null;
+    int currentTime;
+    Scheduler schedulerInstance = null;
     private int counter = 0;
     private Label schedulerLabel , timeLabel;
-    Scene scene1, scene2;
+    Scene scene1, scene2 , scene3;
+    StackPane rectangleWithLabel ;
     Rectangle rect ;
     double xCoordinate ;
-    public void printProcessList() {
-        System.out.println("Current List of Processes:");
-        for (Process process : processList) {
-            System.out.println(process.getArrival_time()+" "+process.getBurst_time()+" "+ process.getPriority());
-            System.out.println();
-        }
-    }
+    Boolean isLive = false ;
+//    public void printProcessList() {
+//        System.out.println("Current List of Processes:");
+//        for (Process process : processList) {
+//            System.out.println(process.getArrival_time()+" "+process.getBurst_time()+" "+ process.getPriority());
+//            System.out.println();
+//        }
+//    }
     @Override
     public void start(Stage stage) throws IOException {
         //flags
         final int rectangleWidth = 60;
         final int rectangleHeight = 40;
-        final int spacing = 10;
+//        final int spacing = 10;
         final boolean[] priorityFlag = {false};
         // Value storing the type of Scheduler
         //set stage
-        stage.setResizable(false);
+        stage.setResizable(true);
         stage.setTitle("CPU SCHEDULER - ENG ASU");
         //setting pane
         GridPane pane = new GridPane(); //radio buttons holder
@@ -60,7 +66,7 @@ public class HelloApplication extends Application implements EventHandler<Action
         pane.setVgap(32); // Set vertical gap
         pane.setPadding(new Insets(4, 48, 48, 48));
 
-        Pane pane2 = new Pane(); // tabel holder
+        Pane pane2 = new Pane(); // table holder
         pane2.setPadding(new Insets(4, 48, 10, 48));
 
         GridPane grid = new GridPane(); //text fields and add button holder
@@ -68,7 +74,7 @@ public class HelloApplication extends Application implements EventHandler<Action
         grid.setVgap(5);
         grid.setHgap(5);
 
-        Pane pane3 = new Pane(); // schedular button holder
+        Pane pane3 = new Pane(); // scheduler button holder
         pane3.setPadding(new Insets(4, 48, 10, 48));
 
         //text set
@@ -103,8 +109,11 @@ public class HelloApplication extends Application implements EventHandler<Action
         Button addButton = new Button("Add Process");
         GridPane.setConstraints(addButton, 5, 7);
 
-        Button scheduleButton = new Button("Schedule Processes");
-        scheduleButton.setLayoutX(168);
+        Button liveScheduling  = new Button("Live Schedule");
+        liveScheduling.setLayoutX(80);
+
+        Button nonLiveScheduling  = new Button("Non-Live Schedule");
+        nonLiveScheduling.setLayoutX(200);
         //GridPane.setConstraints(scheduleButton, 9, 8);
 
         //Radio buttons setting
@@ -118,10 +127,10 @@ public class HelloApplication extends Application implements EventHandler<Action
         RadioButton SRTF_button = new RadioButton("SRTF");
         SRTF_button.setToggleGroup(group);
         pane.add(SRTF_button,1,3);
-        RadioButton PP_button = new RadioButton("PRIORITY-PREEMEPTIVE");
+        RadioButton PP_button = new RadioButton("PRIORITY-PREEMPTIVE");
         PP_button.setToggleGroup(group);
         pane.add(PP_button,2,2);
-        RadioButton PNP_button = new RadioButton("PRIORITY-NONPREEMEPTIVE");
+        RadioButton PNP_button = new RadioButton("PRIORITY-NON-PREEMPTIVE");
         PNP_button.setToggleGroup(group);
         pane.add(PNP_button,2,3);
         RadioButton RR_button = new RadioButton("ROUND_ROBIN");
@@ -144,7 +153,7 @@ public class HelloApplication extends Application implements EventHandler<Action
         TableColumn<Process, Integer> priority = new TableColumn<>("PRIORITY");
         priority.setCellValueFactory(new PropertyValueFactory<>("priority"));
 
-        //////////////////////////////////////////////////////////////////Tabel/////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////// Table /////////////////////////////////////////////////////
 // Set column alignment and resizing
         processName.setSortable(false); // Example: Disable sorting for Process Name column
         burstTime.setSortable(false);    // Enable sorting for Burst Time column
@@ -156,7 +165,7 @@ public class HelloApplication extends Application implements EventHandler<Action
         burstTime.setResizable(false);    // Enable resizing for Burst Time column
         arrivalTime.setResizable(false);  // Enable resizing for Arrival Time column
        priority.setResizable(false);      // Enable resizing for Priority column
-        //////////////////////////////////////////////////////////////////Tabel/////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////Table/////////////////////////////////////////////////////
 
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////   Event Handlers  //////////////////////////////////////////////////
@@ -172,7 +181,7 @@ public class HelloApplication extends Application implements EventHandler<Action
             grid.getChildren().add(pBurstTime);
             grid.getChildren().add(pArrivalTime);
             grid.getChildren().add(addButton);
-            pane3.getChildren().add(scheduleButton);
+            pane3.getChildren().addAll(liveScheduling,nonLiveScheduling);
             updateScheduler("FCFS");
         });
         SJF_button.setOnAction((e)->{
@@ -183,7 +192,7 @@ public class HelloApplication extends Application implements EventHandler<Action
             grid.getChildren().add(pBurstTime);
             grid.getChildren().add(pArrivalTime);
             grid.getChildren().add(addButton);
-            pane3.getChildren().add(scheduleButton);
+            pane3.getChildren().addAll(liveScheduling,nonLiveScheduling);
             updateScheduler("SJF");
 
 
@@ -196,7 +205,7 @@ public class HelloApplication extends Application implements EventHandler<Action
             grid.getChildren().add(pBurstTime);
             grid.getChildren().add(pArrivalTime);
             grid.getChildren().add(addButton);
-            pane3.getChildren().add(scheduleButton);
+            pane3.getChildren().addAll(liveScheduling,nonLiveScheduling);
             updateScheduler("SRTF");
 
         });
@@ -209,7 +218,7 @@ public class HelloApplication extends Application implements EventHandler<Action
             grid.getChildren().add(pArrivalTime);
             grid.getChildren().add(pPriority);
             grid.getChildren().add(addButton);
-            pane3.getChildren().add(scheduleButton);
+            pane3.getChildren().addAll(liveScheduling,nonLiveScheduling);
             priorityFlag[0] = true;
             updateScheduler("PP");
 
@@ -223,7 +232,7 @@ public class HelloApplication extends Application implements EventHandler<Action
             grid.getChildren().add(pArrivalTime);
             grid.getChildren().add(pPriority);
             grid.getChildren().add(addButton);
-            pane3.getChildren().add(scheduleButton);
+            pane3.getChildren().addAll(liveScheduling,nonLiveScheduling);
             priorityFlag[0]=true;
             updateScheduler("PNP");
 
@@ -236,12 +245,12 @@ public class HelloApplication extends Application implements EventHandler<Action
             grid.getChildren().add(pBurstTime);
             grid.getChildren().add(pArrivalTime);
             grid.getChildren().add(addButton);
-            pane3.getChildren().add(scheduleButton);
+            pane3.getChildren().addAll(liveScheduling,nonLiveScheduling);
             updateScheduler("RR");
 
         });
 
-        ;
+
 // Add button Handler
         addButton.setOnAction(e -> {
             // Retrieve input values from text fields
@@ -250,7 +259,6 @@ public class HelloApplication extends Application implements EventHandler<Action
                 String inputName = pName.getText() ;
                 int inputArrivalTime = Integer.parseInt(pArrivalTime.getText());
                 int inputBurstTime = Integer.parseInt(pBurstTime.getText());
-
                 Process process ;
               if(priorityFlag[0])
               {
@@ -273,7 +281,6 @@ public class HelloApplication extends Application implements EventHandler<Action
                 pArrivalTime.clear();
                 pBurstTime.clear();
                 pPriority.clear(); // Clear this if using priority
-
                 processList.add(process);
 
 
@@ -296,35 +303,70 @@ public class HelloApplication extends Application implements EventHandler<Action
          scene1 = new Scene(vbox, 450, 600);
 
         //  scene 2
-        Label label2 = new Label("Output");
-        Button button2 = new Button("Go to scene 1");
-         schedulerLabel = new Label("Default Scheduler");
+//        Label label2 = new Label("Output");
+        Button switchToScene1Butt = new Button("Go to scene 1");
+         schedulerLabel = new Label(scheduler);
         schedulerLabel.setAlignment(Pos.TOP_RIGHT);
 
         // Label that updates every second
-        timeLabel = new Label("Counter: 0");
-
-        // Timeline for updating the label
-        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), event -> {
-            updateLabel(timeLabel);
-            drawRectangle();
-        }));
-
-        timeline.setCycleCount(Timeline.INDEFINITE);
-        timeline.play();
+        timeLabel = new Label("Counter: "+currentTime);
+        Button drawGantChartBtn = new Button("Draw Gant Chart") ;
 
 
-        VBox layout2 = new VBox(20);
-        layout2.setAlignment(Pos.CENTER);
-        layout2.getChildren().addAll(label2, button2, schedulerLabel, timeLabel);
-        scene2 = new Scene(layout2, 500, 450);
+
+        VBox vbox1 = new VBox(20);
+        vbox1.setAlignment(Pos.TOP_LEFT);
+        vbox1.getChildren().addAll( switchToScene1Butt, schedulerLabel, timeLabel,drawGantChartBtn);
+        scene2 = new Scene(vbox1, 500, 450);
 
             //button actions
-        scheduleButton.setOnAction(e -> {
-            part2(processList, scheduler);
+        liveScheduling.setOnAction(e -> {
+            output = scheduleProcessing(processList,scheduler,currentTime);
+            isLive= true ;
              stage.setScene(scene2);
         });
-        button2.setOnAction(e-> stage.setScene(scene1));
+        nonLiveScheduling.setOnAction(e->
+        {
+            output = scheduleProcessing(processList,scheduler,currentTime);
+            stage.setScene(scene2);
+
+        });
+        switchToScene1Butt.setOnAction(e-> stage.setScene(scene1));
+
+        //scene 3
+          Button switchToScene2 = new Button("Switch to scene 2") ;
+        Button switchToScene1 = new Button("Switch to scene 1") ;
+
+        // Button handlers for scene 3 buttons
+        switchToScene1.setOnAction(e->{
+            stage.setScene(scene1);
+        });
+        switchToScene2.setOnAction(e->{
+            stage.setScene(scene2);
+        });
+        // Initialization of UI components should be outside the button action handler
+        VBox scene3Vbox = new VBox(20);
+        scene3Vbox.getChildren().addAll(switchToScene1, switchToScene2);
+        scene3Vbox.setAlignment(Pos.TOP_CENTER);
+
+        Scene scene3 = new Scene(scene3Vbox, 500, 500);
+
+
+// Set up scene switching
+        switchToScene1.setOnAction(e -> stage.setScene(scene1));
+        switchToScene2.setOnAction(e -> stage.setScene(scene2));
+
+// Button handler for drawing the Gantt chart
+        drawGantChartBtn.setOnAction(e -> {
+//            while(schedulerInstance.processEmpty())
+            // Create a Timeline with a KeyFrame that runs every 3 seconds
+            StackPane root = drawGantChart(output);
+            scene3Vbox.getChildren().add(root); // Add new updated Gantt chart
+            stage.setScene(scene3); // Set scene after updating contents
+        });
+
+// Set this scene configuration once if not dynamic or needs refresh every time
+        stage.setScene(scene3);
 
 // Set the initial scene to the stage
         stage.setScene(scene1);
@@ -337,31 +379,116 @@ public class HelloApplication extends Application implements EventHandler<Action
         schedulerLabel.setText("Current Scheduler: " + scheduler);
     }
 
-void part2 (List<Process> processList, String Scheduler) {
-   // Print processes for debugging
-    printProcessList();
-}
+//void part2 (List<Process> processList, String Scheduler) {
+//   /*
+// Print processes for debugging
+//    printProcessList();
+//*/
+//}
     // Function to update the label
     private void updateLabel(Label label) {
         counter++;
         label.setText("Counter: " + counter);
     }
     // Method to draw rectangles
-    private void drawRectangle() {
-        final int rectangleWidth = 60;
-        final int rectangleHeight = 40;
+    StackPane drawGantChart(List<Process> inputs){
+        StackPane root = new StackPane();
+        root.setPadding(new javafx.geometry.Insets(0)); // Set padding to zero
 
-        // Calculate the x-coordinate based on the counter and rectangle width
-         xCoordinate  = xCoordinate+ rectangleWidth;
+        // Create an HBox to hold all the rectangles and labels
+        HBox hbox = new HBox();
+        hbox.setAlignment(Pos.CENTER);
+        hbox.setSpacing(0); // Remove spacing between HBox instances
 
-        // Create a new rectangle with the calculated x-coordinate
-        rect = new Rectangle(50, xCoordinate, rectangleWidth, rectangleHeight);
-        rect.setFill(Color.DARKCYAN);
+        // Create rectangles with fixed sizes and labels
+//        String[] rectangleNames = {"Rectangle 1", "Rectangle 2", "Rectangle 3"};
+// youssef
+        timeline = new Timeline(
+                new KeyFrame(Duration.seconds(3), event -> {
+                    if (schedulerInstance.processEmpty()) {
+                        timeline.stop(); // Stop the timeline if flag is false
+                    }
+                    rectangleWithLabel = createRectangleWithLabel(schedulerInstance.getProcessNameNow(currentTime),
+                             xPosition, 60, 40);
+                    hbox.getChildren().add(rectangleWithLabel);
+                    currentTime++ ;
+//                    if (scene3Vbox.getChildren().contains(root)) {
+//                        scene3Vbox.getChildren().remove(root); // Removes old Gantt chart if present
+//                    }
 
-        // Add the rectangle to the layout of scene 2
-        VBox layout2 = (VBox) scene2.getRoot();
-        layout2.getChildren().add(rect);
+
+                })
+        );
+        timeline.setCycleCount(Timeline.INDEFINITE); // Repeat indefinitely
+        timeline.play(); // Start the timeline
+
+
+//            scheduleProcessing(processList,scheduler,currentTime);
+
+        // Add the HBox to the StackPane
+
+        xPosition += 1; // Update the x position for the next rectangle
+        root.getChildren().add(hbox);
+        return root ;
     }
+
+    public StackPane createRectangleWithLabel(String labelText, double xPosition, double width, double height) {
+        // Create a rectangle with fixed dimensions
+        Rectangle rectangle = new Rectangle(xPosition * 10, 50, width, height);
+        rectangle.setFill(Color.LIGHTBLUE);
+        rectangle.setStroke(Color.BLACK);
+
+        // Create a label for the rectangle
+        Label label = new Label(labelText);
+        label.setTextFill(Color.BLACK);
+        label.setAlignment(Pos.CENTER);
+        label.setMinSize(width, height); // Ensure label size matches rectangle size
+
+        // Create a StackPane to hold the rectangle and label
+        StackPane stackPane = new StackPane();
+        stackPane.setTranslateX(xPosition); // Position the StackPane
+        stackPane.getChildren().addAll(rectangle, label);
+
+        return stackPane;
+    }
+    public List<Process> scheduleProcessing(List<Process> processList, String scheduler , int time) {
+
+        // Instantiate the appropriate scheduler based on the input string
+        switch (scheduler) {
+            case "FCFS":
+                schedulerInstance = new FCFS(processList);
+                break;
+            case "RR":
+                schedulerInstance = new RR(processList);
+                break;
+            case "SJF":
+                schedulerInstance = new SJF(processList);
+                break;
+            case "SRTF":
+                schedulerInstance = new SRTF(processList);
+                break;
+            case "PP":
+                schedulerInstance = new PriorityPrimitiveSchedular(processList);
+                break;
+            case "PNP":
+                schedulerInstance = new PriorityNonPrimitive(processList);
+                break;
+            default:
+                System.out.println("Invalid scheduler type: " + scheduler);
+                break;
+        }
+
+        // Insert processes into the scheduler
+        if (schedulerInstance != null) {
+            for (Process p : processList) {
+//                schedulerInstance.insertProcess(p.getProcess_name(), time, p.getBurst_time(), 0);
+            }
+        }
+
+        // Return the list of scheduled processes (if needed)
+        return processList;
+    }
+
 
     public static void main(String[] args) {
 

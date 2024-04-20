@@ -1,31 +1,23 @@
-package com.example.cpu_scheduler.Schedular;
+package com.example.cpu_scheduler.Scheduler;
 
 import com.example.cpu_scheduler.Process;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.PriorityQueue;
+import java.util.Queue;
 
-class SJF extends Schedular {
+public class FCFS extends Scheduler {
 
-  PriorityQueue<Process> queue;
-  Process p;
+  Queue<Process> queue;
+
   int counter = 0;
+  Process p;
 
-  SJF(List<Process> proArr) {
-    queue =
-      new PriorityQueue<>(
-        new Comparator<Process>() {
-          public int compare(Process p1, Process p2) {
-            int res = p1.getBurst_time() - p2.getBurst_time();
-            if (res == 0) {
-              res += (p1.getArrival_time() - p2.getArrival_time());
-            }
-            return res;
-          }
-        }
-      );
+  public FCFS(List<Process> proArr) {
+    queue = new LinkedList<>();
+
     processesList = new ArrayList<Process>(proArr.size());
     for (int i = 0; i < proArr.size(); i++) {
       processesList.add(proArr.get(i));
@@ -59,8 +51,7 @@ class SJF extends Schedular {
       queue.offer(processesList.get(counter));
       counter++;
     }
-
-
+    String res = "";
     if (p == null) {
       if (queue.isEmpty()) {
         return "";
@@ -68,9 +59,9 @@ class SJF extends Schedular {
       p = queue.poll();
     }
     p.setBurst_time(p.getBurst_time() - 1);
-    String res = p.getProcess_name();
+    res = p.getProcess_name();
     if (p.getBurst_time() <= 0) {
-      p.setFinalTime(currentTime+1);
+      p.setFinalTime(currentTime + 1);
       p = null;
     }
     return res;

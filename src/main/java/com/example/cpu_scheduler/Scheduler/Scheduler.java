@@ -1,21 +1,21 @@
-package com.example.cpu_scheduler.Schedular;
+package com.example.cpu_scheduler.Scheduler;
 
 import com.example.cpu_scheduler.Process;
 import java.util.List;
 
-public abstract class Schedular {
+public abstract class Scheduler {
 
   List<Process> processesList;
 
   // If there is any processes left ro run
   public abstract boolean processEmpty();
 
-  // what process to run at the current time
+  // which process to run at the current time
   // Note that the function needs to be called (1), (2) and so forth
   // if no process now, will return empty string ""
   public abstract String getProcessNameNow(int currentTime);
 
-  // Insert process name ,current time, burst time and if the schedular don't use the priority give any arbitrary value
+  // Insert process name ,current time, burst time and if the scheduler don't use the priority give any arbitrary value
   public abstract void insertProcess(
     String name,
     int currentTime,
