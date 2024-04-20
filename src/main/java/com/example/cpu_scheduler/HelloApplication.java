@@ -411,6 +411,8 @@ public class HelloApplication extends Application implements EventHandler<Action
                     rectangleWithLabel = createRectangleWithLabel(schedulerInstance.getProcessNameNow(currentTime),
                              xPosition, 60, 40);
                     hbox.getChildren().add(rectangleWithLabel);
+                    xPosition += 1; // Update the x position for the next rectangle
+
                     currentTime++ ;
 //                    if (scene3Vbox.getChildren().contains(root)) {
 //                        scene3Vbox.getChildren().remove(root); // Removes old Gantt chart if present

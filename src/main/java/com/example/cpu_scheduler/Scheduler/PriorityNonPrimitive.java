@@ -47,7 +47,7 @@ public class PriorityNonPrimitive extends Scheduler {
 
   @Override
   public boolean processEmpty() {
-    return queue.isEmpty() && counter == processesList.size();
+    return queue.isEmpty() && counter == processesList.size()&&p==null;
   }
 
   @Override
