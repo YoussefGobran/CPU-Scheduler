@@ -11,9 +11,10 @@ import java.util.Queue;
 public class FCFS extends Schedular {
 
   Queue<Process> queue;
-  List<Process> processesList;
+
   int counter = 0;
   Process p;
+
   FCFS(List<Process> proArr) {
     queue = new LinkedList<>();
 
@@ -37,12 +38,12 @@ public class FCFS extends Schedular {
   }
 
   @Override
-  boolean processEmpty() {
+  public boolean processEmpty() {
     return queue.isEmpty() && counter == processesList.size();
   }
 
   @Override
-  String getProcessNameNow(int currentTime) {
+  public String getProcessNameNow(int currentTime) {
     while (
       counter < processesList.size() &&
       currentTime > processesList.get(counter).getArrival_time()
@@ -50,23 +51,24 @@ public class FCFS extends Schedular {
       queue.offer(processesList.get(counter));
       counter++;
     }
-    String res="";
-    if(p==null){
-      if(queue.isEmpty()){
+    String res = "";
+    if (p == null) {
+      if (queue.isEmpty()) {
         return "";
       }
-      p = queue.poll();  
+      p = queue.poll();
     }
     p.setBurst_time(p.getBurst_time() - 1);
-    res=p.getProcess_name();
-    if(p.getBurst_time()<=0){
-      p=null;
+    res = p.getProcess_name();
+    if (p.getBurst_time() <= 0) {
+      p.setFinalTime(currentTime + 1);
+      p = null;
     }
     return res;
   }
 
   @Override
-  void insertProcess(
+  public void insertProcess(
     String name,
     int currentTime,
     int burstTime,

@@ -6,7 +6,8 @@ public class Process {
     private int burst_time;
     private int priority ;
     private int arrival_time;
-    private int remaining ;
+    private int final_time;
+    private int original_burst_time;
     //constructors
     //In case of FCFS or RoundRobin
     public Process(String pName , int aTime , int bTime)
@@ -14,7 +15,9 @@ public class Process {
         this.process_name = pName;
         this.arrival_time=aTime;
         this.burst_time= bTime;
-        remaining = bTime;
+        this.priority=0;
+        this.original_burst_time=bTime;
+        this.final_time=0;
     }
     //In case of priority or sjf in both cases
     public Process(String pName , int aTime , int bTime,int pri)
@@ -23,17 +26,16 @@ public class Process {
         this.arrival_time=aTime;
         this.burst_time= bTime;
         this.priority = pri;
-        remaining = bTime;
+        this.original_burst_time=bTime;
+        this.final_time=0;
     }
 
     //getters
-    public int getRemaining() {
-        return remaining;
-    }
-
+ 
     public int getBurst_time() {
         return burst_time;
     }
+    
 
     public void setBurst_time(int burst_time) {
         this.burst_time = burst_time;
@@ -55,9 +57,6 @@ public class Process {
         this.arrival_time = arrival_time;
     }
 
-    public void setRemaining(int remaining) {
-        this.remaining = remaining;
-    }
 
     public String getProcess_name() {
         return process_name;
@@ -67,9 +66,18 @@ public class Process {
         this.process_name = process_name;
     }
 
-    //decrement Remaining time
-    public void decRemaining ()
-    {
-        remaining--;
+    public int getFinalTime() {
+        return this.final_time;
+    }
+    public void setFinalTime(int final_time) {
+        this.final_time=final_time;
+    }
+    
+    // Methods
+    public int getWaitingTime(){
+        return this.final_time-this.arrival_time-this.original_burst_time;
+    }
+    public int getTurnAroundTime(){
+        return this.final_time-this.arrival_time;
     }
 }

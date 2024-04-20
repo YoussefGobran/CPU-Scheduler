@@ -1,17 +1,16 @@
 package com.example.cpu_scheduler.Schedular;
+
 import com.example.cpu_scheduler.Process;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-
 import java.util.Queue;
 
 public class RR extends Schedular {
 
   Queue<Process> queue;
-  List<Process> processesList;
   int counter = 0;
 
   RR(List<Process> proArr) {
@@ -37,12 +36,12 @@ public class RR extends Schedular {
   }
 
   @Override
-  boolean processEmpty() {
+  public boolean processEmpty() {
     return queue.isEmpty() && counter == processesList.size();
   }
 
   @Override
-  String getProcessNameNow(int currentTime) {
+  public String getProcessNameNow(int currentTime) {
     while (
       counter < processesList.size() &&
       currentTime > processesList.get(counter).getArrival_time()
@@ -53,17 +52,19 @@ public class RR extends Schedular {
     if (queue.isEmpty()) {
       return "";
     }
-    Process p=queue.poll();
+    Process p = queue.poll();
     p.setBurst_time(p.getBurst_time() - 1);
     String res = p.getProcess_name();
     if (p.getBurst_time() > 0) {
       queue.offer(p);
+    } else {
+      p.setFinalTime(currentTime + 1);
     }
     return res;
   }
 
   @Override
-  void insertProcess(
+  public void insertProcess(
     String name,
     int currentTime,
     int burstTime,

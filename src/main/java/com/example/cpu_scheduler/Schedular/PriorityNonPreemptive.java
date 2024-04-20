@@ -10,7 +10,6 @@ import java.util.PriorityQueue;
 class PriorityNonPrimitive extends Schedular {
 
   PriorityQueue<Process> queue;
-  List<Process> processesList;
   Process p;
   int counter = 0;
 
@@ -47,12 +46,12 @@ class PriorityNonPrimitive extends Schedular {
   }
 
   @Override
-  boolean processEmpty() {
+  public boolean processEmpty() {
     return queue.isEmpty() && counter == processesList.size();
   }
 
   @Override
-  String getProcessNameNow(int currentTime) {
+  public String getProcessNameNow(int currentTime) {
     while (
       counter < processesList.size() &&
       currentTime > processesList.get(counter).getArrival_time()
@@ -60,7 +59,6 @@ class PriorityNonPrimitive extends Schedular {
       queue.offer(processesList.get(counter));
       counter++;
     }
-
 
     if (p == null) {
       if (queue.isEmpty()) {
@@ -71,13 +69,14 @@ class PriorityNonPrimitive extends Schedular {
     p.setBurst_time(p.getBurst_time() - 1);
     String res = p.getProcess_name();
     if (p.getBurst_time() <= 0) {
+      p.setFinalTime(currentTime + 1);
       p = null;
     }
     return res;
   }
 
   @Override
-  void insertProcess(
+  public void insertProcess(
     String name,
     int currentTime,
     int burstTime,
