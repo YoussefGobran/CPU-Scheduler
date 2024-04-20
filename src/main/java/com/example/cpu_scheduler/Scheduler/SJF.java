@@ -54,7 +54,7 @@ public class SJF extends Scheduler {
   public String getProcessNameNow(int currentTime) {
     while (
       counter < processesList.size() &&
-      currentTime > processesList.get(counter).getArrival_time()
+      currentTime >= processesList.get(counter).getArrival_time()
     ) {
       queue.offer(processesList.get(counter));
       counter++;
