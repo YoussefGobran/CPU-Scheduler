@@ -33,12 +33,12 @@ public class HelloApplication extends Application implements EventHandler<Action
     private List<Process> newList = new ArrayList<>();
     private List<Process> output = new ArrayList<>();
     String scheduler = null;
-    int currentTime;
+    int currentTime=0;
     Scheduler schedulerInstance = null;
     private int counter = 0;
     private Label schedulerLabel , timeLabel;
     Scene scene1, scene2 , scene3;
-    StackPane rectangleWithLabel ;
+    VBox rectangleWithLabel ;
     Rectangle rect ;
     double xCoordinate ;
     Boolean isLive = false ;
@@ -404,16 +404,17 @@ public class HelloApplication extends Application implements EventHandler<Action
 //        String[] rectangleNames = {"Rectangle 1", "Rectangle 2", "Rectangle 3"};
 // youssef
         timeline = new Timeline(
-                new KeyFrame(Duration.seconds(3), event -> {
+                new KeyFrame(Duration.seconds(1), event -> {
                     if (schedulerInstance.processEmpty()) {
                         timeline.stop(); // Stop the timeline if flag is false
                     }
-                    rectangleWithLabel = createRectangleWithLabel(schedulerInstance.getProcessNameNow(currentTime),
+                    String name = schedulerInstance.getProcessNameNow(currentTime) ;
+                    System.out.println(name);
+                    rectangleWithLabel = createRectangleWithLabel(name,
                              xPosition, 60, 40);
                     hbox.getChildren().add(rectangleWithLabel);
-                    xPosition += 1; // Update the x position for the next rectangle
-
                     currentTime++ ;
+                    xPosition += 1; // Update the x position for the next rectangle
 //                    if (scene3Vbox.getChildren().contains(root)) {
 //                        scene3Vbox.getChildren().remove(root); // Removes old Gantt chart if present
 //                    }
@@ -429,12 +430,11 @@ public class HelloApplication extends Application implements EventHandler<Action
 
         // Add the HBox to the StackPane
 
-        xPosition += 1; // Update the x position for the next rectangle
         root.getChildren().add(hbox);
         return root ;
     }
 
-    public StackPane createRectangleWithLabel(String labelText, double xPosition, double width, double height) {
+    public VBox createRectangleWithLabel(String labelText, double xPosition, double width, double height) {
         // Create a rectangle with fixed dimensions
         Rectangle rectangle = new Rectangle(xPosition * 10, 50, width, height);
         rectangle.setFill(Color.LIGHTBLUE);
@@ -450,8 +450,12 @@ public class HelloApplication extends Application implements EventHandler<Action
         StackPane stackPane = new StackPane();
         stackPane.setTranslateX(xPosition); // Position the StackPane
         stackPane.getChildren().addAll(rectangle, label);
-
-        return stackPane;
+        VBox vbox = new VBox(10);
+        Label timing = new Label((String.valueOf(currentTime))) ;
+        timing.setAlignment(Pos.CENTER_LEFT);
+//        vbox.setSpacing(10);
+        vbox.getChildren().addAll(stackPane,timing) ;
+        return vbox;
     }
     public List<Process> scheduleProcessing(List<Process> processList, String scheduler , int time) {
 
