@@ -7,6 +7,15 @@ public class Process {
     private int priority ;
     private int arrival_time;
     private int final_time;
+
+    public int getOriginal_burst_time() {
+        return original_burst_time;
+    }
+
+    public void setOriginal_burst_time(int original_burst_time) {
+        this.original_burst_time = original_burst_time;
+    }
+
     private int original_burst_time;
     //constructors
     //In case of FCFS or RoundRobin
