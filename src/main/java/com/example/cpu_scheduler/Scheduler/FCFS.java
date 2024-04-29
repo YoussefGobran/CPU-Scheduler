@@ -12,7 +12,6 @@ public class FCFS extends Scheduler {
 
   Queue<Process> queue;
 
-  int counter = 0;
   Process p;
 
   public FCFS(List<Process> proArr) {
@@ -23,18 +22,7 @@ public class FCFS extends Scheduler {
       processesList.add(proArr.get(i));
     }
 
-    Collections.sort(
-      processesList,
-      new Comparator<Process>() {
-        public int compare(Process p1, Process p2) {
-          int res = p1.getArrival_time() - p2.getArrival_time();
-          if (res == 0) {
-            res += (p1.getBurst_time() - p2.getBurst_time());
-          }
-          return res;
-        }
-      }
-    );
+    sortList();
   }
 
   @Override
@@ -67,16 +55,4 @@ public class FCFS extends Scheduler {
     return res;
   }
 
-  @Override
-  public void insertProcess(
-    String name,
-    int currentTime,
-    int burstTime,
-    int priority
-  ) {
-    processesList.add(
-      counter,
-      new Process(name, currentTime, burstTime, priority)
-    );
-  }
 }
